@@ -17,6 +17,8 @@ using namespace glm;
 // 3D models
 C3dglModel camera;
 
+C3dglModel table;
+
 // The View Matrix
 mat4 matrixView;
 
@@ -40,6 +42,8 @@ bool init()
 
 	// load your 3D models here!
 	if (!camera.load("models\\camera.3ds")) return false;
+
+	if (!table.load("models\\table.obj")) return false;
 
 	// Initialise the View Matrix (initial position of the camera)
 	matrixView = rotate(mat4(1), radians(12.f), vec3(1, 0, 0));
@@ -71,12 +75,30 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, rgbaGrey);	// --- DEPRECATED
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, rgbaGrey);	// --- DEPRECATED
 
-	// camera
 	m = matrixView;
 	m = translate(m, vec3(-3.0f, 0, 0.0f));
 	m = rotate(m, radians(180.f), vec3(0.0f, 1.0f, 0.0f));
-	m = scale(m, vec3(0.04f, 0.04f, 0.04f));
-	camera.render(m);
+	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
+	table.render(0, m);
+	table.render(1, m);
+
+	m = matrixView;
+	m = translate(m, vec3(-3.0f, 0, 0.0f));
+	m = rotate(m, radians(0.f), vec3(0.0f, 1.0f, 0.0f));
+	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
+	table.render(0, m);
+
+	m = matrixView;
+	m = translate(m, vec3(-3.0f, 0, 0.0f));
+	m = rotate(m, radians(270.f), vec3(0.0f, 1.0f, 0.0f));
+	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
+	table.render(0, m);
+
+	m = matrixView;
+	m = translate(m, vec3(-3.0f, 0, 0.0f));
+	m = rotate(m, radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
+	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
+	table.render(0, m);
 
 	// setup materials - blue
 	GLfloat rgbaBlue[] = { 0.2f, 0.2f, 0.8f, 1.0f };		// --- DEPRECATED
@@ -85,8 +107,9 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 
 	// teapot
 	m = matrixView;
-	m = translate(m, vec3(15.0f, 0, 0.0f));
-	m = rotate(m, radians(120.f), vec3(0.0f, 1.0f, 0.0f));
+	m = translate(m, vec3(-4.5f, 3.5f, 0.5f));
+	m = rotate(m, radians(320.f), vec3(0.0f, 1.0f, 0.0f));
+	m = scale(m, vec3(0.25f, 0.25f, 0.25f));
 	// the GLUT objects require the Model View Matrix setup
 	glMatrixMode(GL_MODELVIEW);								// --- DEPRECATED
 	glLoadIdentity();										// --- DEPRECATED
