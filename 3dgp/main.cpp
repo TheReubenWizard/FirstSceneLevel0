@@ -14,10 +14,15 @@ using namespace std;
 using namespace _3dgl;
 using namespace glm;
 
+// GLSL Program
+C3dglProgram program;
+
 // 3D models
 C3dglModel camera;
 
 C3dglModel table;
+
+C3dglModel vase;
 
 // The View Matrix
 mat4 matrixView;
@@ -30,6 +35,24 @@ float _fov = 60.f;		// field of view (zoom)
 
 bool init()
 {
+	// shaders
+	C3dglShader vertexShader;
+	C3dglShader fragmentShader;
+
+	if (!vertexShader.create(GL_VERTEX_SHADER)) return false;
+	if (!vertexShader.loadFromFile("shaders/basic.vert")) return false;
+	if (!vertexShader.compile()) return false;
+
+	if (!fragmentShader.create(GL_FRAGMENT_SHADER)) return false;
+	if (!fragmentShader.loadFromFile("shaders/basic.frag")) return false;
+	if (!fragmentShader.compile()) return false;
+
+	if (!program.create()) return false;
+	if (!program.attach(vertexShader)) return false;
+	if (!program.attach(fragmentShader)) return false;
+	if (!program.link()) return false;
+	if (!program.use(true)) return false;
+
 	// rendering states
 	glEnable(GL_DEPTH_TEST);	// depth test is necessary for most 3D scenes
 	glEnable(GL_NORMALIZE);		// normalization is needed by AssImp library models
@@ -40,10 +63,13 @@ bool init()
 	glEnable(GL_LIGHTING);									// --- DEPRECATED
 	glEnable(GL_LIGHT0);									// --- DEPRECATED
 
+
 	// load your 3D models here!
 	if (!camera.load("models\\camera.3ds")) return false;
 
 	if (!table.load("models\\table.obj")) return false;
+
+	if (!vase.load("models\\vase.obj")) return false;
 
 	// Initialise the View Matrix (initial position of the camera)
 	matrixView = rotate(mat4(1), radians(12.f), vec3(1, 0, 0));
@@ -76,29 +102,35 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, rgbaGrey);	// --- DEPRECATED
 
 	m = matrixView;
-	m = translate(m, vec3(-3.0f, 0, 0.0f));
+	m = translate(m, vec3(0.0f, 0, 0.0f));
 	m = rotate(m, radians(180.f), vec3(0.0f, 1.0f, 0.0f));
 	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
 	table.render(0, m);
 	table.render(1, m);
 
 	m = matrixView;
-	m = translate(m, vec3(-3.0f, 0, 0.0f));
+	m = translate(m, vec3(0.0f, 0, 0.0f));
 	m = rotate(m, radians(0.f), vec3(0.0f, 1.0f, 0.0f));
 	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
 	table.render(0, m);
 
 	m = matrixView;
-	m = translate(m, vec3(-3.0f, 0, 0.0f));
+	m = translate(m, vec3(0.0f, 0, 0.0f));
 	m = rotate(m, radians(270.f), vec3(0.0f, 1.0f, 0.0f));
 	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
 	table.render(0, m);
 
 	m = matrixView;
-	m = translate(m, vec3(-3.0f, 0, 0.0f));
+	m = translate(m, vec3(0.0f, 0, 0.0f));
 	m = rotate(m, radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
 	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
 	table.render(0, m);
+
+	m = matrixView;
+	m = translate(m, vec3(0.0f, 3.1f, 0.0f));
+	m = rotate(m, radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
+	m = scale(m, vec3(0.1f, 0.1f, 0.1f));
+	vase.render(0, m);
 
 	// setup materials - blue
 	GLfloat rgbaBlue[] = { 0.2f, 0.2f, 0.8f, 1.0f };		// --- DEPRECATED
@@ -107,7 +139,7 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 
 	// teapot
 	m = matrixView;
-	m = translate(m, vec3(-4.5f, 3.5f, 0.5f));
+	m = translate(m, vec3(-1.0f, 3.45f, 0.5f));
 	m = rotate(m, radians(320.f), vec3(0.0f, 1.0f, 0.0f));
 	m = scale(m, vec3(0.25f, 0.25f, 0.25f));
 	// the GLUT objects require the Model View Matrix setup
