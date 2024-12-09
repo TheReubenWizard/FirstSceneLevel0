@@ -44,6 +44,7 @@ unsigned indexBuffer = 0;
 float pyramidRotation = 0.0f;
 
 
+
 bool init()
 {
 	// shaders
@@ -129,29 +130,42 @@ bool init()
 	cout << "  Drag the mouse to look around" << endl;
 	cout << endl;
 
+	//program.sendUniform("material", vec3(0.2f, 0.5f, 0.4f));
+	//program.sendUniform("lightAmbient.color", vec3(0.1, 0.1, 0.1));
+
 	return true;
 }
 
 void renderScene(mat4& matrixView, float time, float deltaTime)
 {
+	program.sendUniform("lightDir.direction", vec3(1.0, 0.5, 1.0));
+	program.sendUniform("lightDir.diffuse", vec3(0.5, 0.5, 0.5));	  // dimmed white light
 
 	mat4 m;
 
 	// setup materials - grey
-	program.sendUniform("material", vec3(0.6f, 0.6f, 0.6f));
+	program.sendUniform("materialDiffuse", vec3(0.6f, 0.6f, 0.6f));
 
-	
+	program.sendUniform("lightAmbient.color", vec3(0.1, 0.1, 0.1));
+	program.sendUniform("materialAmbient", vec3(1.0, 1.0, 1.0));
+
+	//program.sendUniform("material", vec3(0.6f, 0.6f, 0.6f));
+
+
+
 	m = matrixView;
 	m = translate(m, vec3(0.0f, 0, 0.0f));
 	m = rotate(m, radians(180.f), vec3(0.0f, 1.0f, 0.0f));
 	m = scale(m, vec3(0.004f, 0.004f, 0.004f));
 	table.render(0, m);
 
-	program.sendUniform("material", vec3(0.9f, 0.5f, 0.3f));
+	program.sendUniform("materialDiffuse", vec3(0.9f, 0.5f, 0.3f));
+	//program.sendUniform("material", vec3(0.9f, 0.5f, 0.3f));
 	table.render(1, m);
 
 	// setup materials - grey
-	program.sendUniform("material", vec3(0.6f, 0.6f, 0.6f));
+	program.sendUniform("materialDiffuse", vec3(0.6f, 0.6f, 0.6f));
+	//program.sendUniform("material", vec3(0.6f, 0.6f, 0.6f));
 
 	m = matrixView;
 	m = translate(m, vec3(0.0f, 0, 0.0f));
@@ -172,7 +186,8 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 	table.render(0, m);
 
 	// setup materials - light green
-	program.sendUniform("material", vec3(0.5f, 0.7f, 0.9f));
+	program.sendUniform("materialDiffuse", vec3(0.5f, 0.7f, 0.9f));
+	//program.sendUniform("material", vec3(0.5f, 0.7f, 0.9f));
 
 	m = matrixView;
 	m = translate(m, vec3(0.0f, 3.04f, 0.0f));
@@ -181,7 +196,8 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 	vase.render(0, m);
 
 	// setup materials - blue
-	program.sendUniform("material", vec3(0.2f, 0.2f, 0.8f));
+	program.sendUniform("materialDiffuse", vec3(0.2f, 0.2f, 0.8f));
+	//program.sendUniform("material", vec3(0.2f, 0.2f, 0.8f));
 
 	// teapot
 	m = matrixView;
@@ -195,8 +211,10 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 
 	// pyramid
 	m = matrixView;
-	program.sendUniform("material", vec3(0.9f, 0.1f, 0.1f));
-	m = translate(m, vec3(-1.5f, 3.7f, 0.5f));
+
+	program.sendUniform("materialDiffuse", vec3(0.9f, 0.1f, 0.1f));
+	//program.sendUniform("material", vec3(0.9f, 0.1f, 0.1f));
+	m = translate(m, vec3(-1.5f, 3.74f, 0.5f));
 	m = rotate(m, radians(180.f), vec3(0.0f, 0.0f, 1.0f));
 
 	if (pyramidRotation > 360.0f)
@@ -234,9 +252,12 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 	glDisableVertexAttribArray(attribVertex);
 	glDisableVertexAttribArray(attribNormal);
 
+
+	//program.sendUniform("materialAmbient", vec3(1.0, 1.0, 1.0));
+	program.sendUniform("materialDiffuse", vec3(0.2f, 0.5f, 0.1f));
 	// bunny
 	m = matrixView;
-	program.sendUniform("material", vec3(0.2f, 0.5f, 0.4f));
+
 	m = translate(m, vec3(-1.5f, 3.55f, 0.5f));
 
 	m = rotate(m, radians(pyramidRotation), vec3(0.0f, -1.0f, 0.0f));
@@ -244,6 +265,8 @@ void renderScene(mat4& matrixView, float time, float deltaTime)
 	m = scale(m, vec3(4.0f, 4.0f, 4.0f));
 
 	bunny.render(0, m);
+
+
 }
 
 void onRender()
@@ -265,6 +288,9 @@ void onRender()
 		_vel * deltaTime),		// animate camera motion (controlled by WASD keys)
 		-pitch, vec3(1, 0, 0))	// switch the pitch on
 		* matrixView;
+
+	// setup View Matrix
+	program.sendUniform("matrixView", matrixView);
 
 	// render the scene objects
 	renderScene(matrixView, time, deltaTime);
@@ -377,8 +403,8 @@ void onMotion(int x, int y)
 	float newPitch = glm::clamp(pitch + deltaPitch, -maxPitch, maxPitch);
 	matrixView = rotate(rotate(rotate(mat4(1.f),
 		newPitch, vec3(1.f, 0.f, 0.f)),
-		deltaYaw, vec3(0.f, 1.f, 0.f)), 
-		-pitch, vec3(1.f, 0.f, 0.f)) 
+		deltaYaw, vec3(0.f, 1.f, 0.f)),
+		-pitch, vec3(1.f, 0.f, 0.f))
 		* matrixView;
 }
 
@@ -388,7 +414,7 @@ void onMouseWheel(int button, int dir, int x, int y)
 	onReshape(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	// init GLUT and create Window
 	glutInit(&argc, argv);
@@ -417,8 +443,8 @@ int main(int argc, char **argv)
 	glutMotionFunc(onMotion);
 	glutMouseWheelFunc(onMouseWheel);
 
-	C3dglLogger::log("Vendor: {}", (const char *)glGetString(GL_VENDOR));
-	C3dglLogger::log("Renderer: {}", (const char *)glGetString(GL_RENDERER));
+	C3dglLogger::log("Vendor: {}", (const char*)glGetString(GL_VENDOR));
+	C3dglLogger::log("Renderer: {}", (const char*)glGetString(GL_RENDERER));
 	C3dglLogger::log("Version: {}", (const char*)glGetString(GL_VERSION));
 	C3dglLogger::log("");
 
